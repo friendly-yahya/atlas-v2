@@ -9,6 +9,6 @@ part 'app_env.g.dart';
 abstract class AppEnv {
   @EnviedField(varName: 'SUPABASE_URL')
   static final String supabaseUrl = _AppEnv.supabaseUrl;
-  @EnviedField(varName: 'SUPABASE_ANON_KEY')
-  static final String supabaseAnonKey = _AppEnv.supabaseAnonKey;
+  @EnviedField(varName: 'SUPABASE_PUBLISHABLE_KEY')
+  static final String supabasePublishableKey = _AppEnv.supabasePublishableKey;
 }
