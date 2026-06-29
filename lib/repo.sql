@@ -213,62 +213,48 @@ create table shares (
 );
 
 
--- Profiles (foreign keys referencing auth.users are automatically indexed)
--- operator_profile
 create index idx_operator_profile_user_id on operator_profile(user_id);
 
--- Certifications & insurance & equipment
 create index idx_operator_certifications_operator_id on operator_certifications(operator_id);
 create index idx_operator_insurance_operator_id on operator_insurance(operator_id);
 create index idx_operator_equipment_operator_id on operator_equipment(operator_id);
 
--- Health forms
 create index idx_health_form_templates_created_by on health_form_templates(created_by);
 create index idx_health_form_fields_template_id on health_form_fields(template_id);
 
--- Offers
 create index idx_offers_operator_id on offers(operator_id);
-create index idx_offers_status on offers(status);   -- for filtering active/paused offers
+create index idx_offers_status on offers(status);   -- for filtering 
 
--- Languages, includes, schedule
 create index idx_operator_languages_operator_id on operator_languages(operator_id);
 create index idx_offer_includes_offer_id on offer_includes(offer_id);
 create index idx_offer_schedule_offer_id on offer_schedule(offer_id);
 
--- Slots
 create index idx_slots_offer_id on slots(offer_id);
 
--- Bookings
 create index idx_bookings_slot_id on bookings(slot_id);
 create index idx_bookings_client_id on bookings(client_id);
-create index idx_bookings_status on bookings(status);   -- filter by status
+create index idx_bookings_status on bookings(status);   
 
--- Reviews
 create index idx_reviews_booking_id on reviews(booking_id);
-create index idx_reviews_operator_id on reviews(operator_id);   -- "all reviews for operator"
+create index idx_reviews_operator_id on reviews(operator_id);  
 create index idx_reviews_client_id on reviews(client_id);
 
--- Payments
 create index idx_payments_booking_id on payments(booking_id);
 
--- Health form submissions & answers
 create index idx_health_form_submissions_booking_id on health_form_submissions(booking_id);
 create index idx_health_form_answers_submission_id on health_form_answers(submission_id);
 create index idx_health_form_answers_field_id on health_form_answers(field_id);
 
--- Conversations & messages
 create index idx_conversations_client_id on conversations(client_id);
 create index idx_conversations_operator_id on conversations(operator_id);
 create index idx_messages_conversation_id on messages(conversation_id);
 create index idx_messages_sender_id on messages(sender_id);
-create index idx_messages_created_at on messages(created_at);   -- sort by time
+create index idx_messages_created_at on messages(created_at);  
 
--- Likes & shares
 create index idx_likes_client_id on likes(client_id);
 create index idx_likes_offer_id on likes(offer_id);
 create index idx_shares_client_id on shares(client_id);
 create index idx_shares_offer_id on shares(offer_id);
-
 
 create or replace function update_updated_at()
 returns trigger as $$
