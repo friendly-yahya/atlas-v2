@@ -1,4 +1,3 @@
-
 create table profiles (
     id uuid primary key references auth.users(id) on delete cascade,
 --    email text, 
@@ -56,7 +55,7 @@ create table operator_equipment (
 create table health_form_templates (
     id uuid primary key default gen_random_uuid(),
     created_by uuid not null references profiles(id),
-    name text not null,                            -- added not null
+    name text not null,
     created_at timestamp default now() not null
 );
 
@@ -65,7 +64,7 @@ create table health_form_fields (
     template_id uuid not null references health_form_templates(id),
     question text not null,
     field_type text not null, --idk how would tha work 
-    is_required boolean
+    is_required boolean not null default true
 );
 
 create table offers (
@@ -78,7 +77,7 @@ create table offers (
     longitude numeric,
     price_adult numeric(10,2) not null,
     price_child numeric(10,2),      
-    difficulty text check (difficulty in ('easy', 'moderate', 'hard', 'expert')),  
+    difficulty text not null check (difficulty in ('easy', 'moderate', 'hard', 'expert')),  
     status text not null check (status in ('draft', 'active', 'paused', 'archived')),  
     requires_health_form boolean,
     health_form_template_id uuid references health_form_templates(id),
@@ -116,7 +115,6 @@ create table slots (
     offer_id uuid not null references offers(id), 
     starts_at timestamp not null,
     capacity integer not null, 
-    booked_count integer default 0 not null,
     created_at timestamp default now() not null,
     updated_at timestamp default now() not null
 );
@@ -129,6 +127,7 @@ create table bookings (
     adults_count integer not null default 1,
     children_count integer not null default 0,
     total_amount numeric(10,2) not null,
+    currency text not null default 'MAD',
     updated_at timestamp default now() not null,    
     created_at timestamp default now() not null
 );
@@ -138,10 +137,12 @@ create table reviews (
     booking_id uuid not null references bookings(id),
     operator_id uuid not null references operator_profile(id),
     client_id uuid not null references profiles(id),--users default to client
-    rating integer not null,
+    rating integer not null check (rating >= 1 and rating <= 5),
     comment text not null,
     created_at timestamp default now() not null
 );
+
+create unique index idx_reviews_booking_client on reviews(booking_id, client_id);
 
 create table payments (
     id uuid primary key default gen_random_uuid(),
@@ -154,7 +155,8 @@ create table payments (
     operator_payout numeric(10,2) not null,
     payout_status text not null check (payout_status in ('pending', 'processing', 'paid', 'failed')),
     paid_at timestamp,            
-    received_at timestamp,         
+    received_at timestamp,
+    created_at timestamp default now() not null,
     updated_at timestamp default now() not null   
 );
 
@@ -188,6 +190,8 @@ create table conversations (
     updated_at timestamp default now() not null   
 );
 
+create unique index idx_conversations_unique on conversations(client_id, operator_id, offer_id);
+
 create table messages (
     id uuid primary key default gen_random_uuid(),
     conversation_id uuid not null references conversations(id),
@@ -204,6 +208,8 @@ create table likes (
     created_at timestamp default now() not null
 );
 
+create unique index idx_likes_unique on likes(client_id, offer_id);
+
 create table shares (
     id uuid primary key default gen_random_uuid(),
     client_id uuid not null references profiles(id),
@@ -211,7 +217,6 @@ create table shares (
     channel text not null, -- 'whatsapp' / 'instagram' / 'link'
     created_at timestamp default now() not null
 );
-
 
 create index idx_operator_profile_user_id on operator_profile(user_id);
 
@@ -223,7 +228,7 @@ create index idx_health_form_templates_created_by on health_form_templates(creat
 create index idx_health_form_fields_template_id on health_form_fields(template_id);
 
 create index idx_offers_operator_id on offers(operator_id);
-create index idx_offers_status on offers(status);   -- for filtering 
+create index idx_offers_status on offers(status);
 
 create index idx_operator_languages_operator_id on operator_languages(operator_id);
 create index idx_offer_includes_offer_id on offer_includes(offer_id);
@@ -233,10 +238,10 @@ create index idx_slots_offer_id on slots(offer_id);
 
 create index idx_bookings_slot_id on bookings(slot_id);
 create index idx_bookings_client_id on bookings(client_id);
-create index idx_bookings_status on bookings(status);   
+create index idx_bookings_status on bookings(status);
 
 create index idx_reviews_booking_id on reviews(booking_id);
-create index idx_reviews_operator_id on reviews(operator_id);  
+create index idx_reviews_operator_id on reviews(operator_id);
 create index idx_reviews_client_id on reviews(client_id);
 
 create index idx_payments_booking_id on payments(booking_id);
@@ -249,7 +254,7 @@ create index idx_conversations_client_id on conversations(client_id);
 create index idx_conversations_operator_id on conversations(operator_id);
 create index idx_messages_conversation_id on messages(conversation_id);
 create index idx_messages_sender_id on messages(sender_id);
-create index idx_messages_created_at on messages(created_at);  
+create index idx_messages_created_at on messages(created_at);
 
 create index idx_likes_client_id on likes(client_id);
 create index idx_likes_offer_id on likes(offer_id);
