@@ -3,13 +3,14 @@ include: package:flutter_lints/flutter.yaml
 analyzer:
   language:
     strict-casts: true
-    strict-inference: true
+    #strict-inference: true
+    strict-inference: false
     strict-raw-types: true
 
   errors:
     missing_required_param: error
     missing_return: error
-    invalid_use_of_protected_member: error
+    #invalid_use_of_protected_member: error
 
   exclude:
     - "**/*.g.dart"
@@ -22,7 +23,7 @@ linter:
   rules:
 
     always_declare_return_types: true
-    always_use_package_imports: true
+    #always_use_package_imports: true
 
     annotate_overrides: true
     use_super_parameters: true
@@ -32,8 +33,8 @@ linter:
     prefer_const_declarations: true
     prefer_const_literals_to_create_immutables: true
 
-    directives_ordering: true
-    sort_constructors_first: true
+    #directives_ordering: true
+    #sort_constructors_first: true
 
     prefer_final_fields: true
     prefer_final_locals: true

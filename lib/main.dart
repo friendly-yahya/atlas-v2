@@ -1,16 +1,16 @@
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-import 'package:firebase_core/firebase_core.dart';
-
-// ignore: always_use_package_imports
 import 'core/env/app_env.dart';
+import 'firebase_options.dart';
+import 'app/app.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initialize(
-    options: DefaultFirebaseOptions.currentPlateform,
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
   );
 
   await Supabase.initialize(
@@ -23,19 +23,4 @@ Future<void> main() async {
       child: AtlasApp()
       )
     );
-}
-
-class AtlasApp extends StatelessWidget {
-  const AtlasApp({super.key});
-
-  @override
-  Widget build(BuildContext context) {
-    return const MaterialApp(
-      home: Scaffold(
-        body: Center(
-          child: Text('Hello World!'),
-        ),
-      ),
-    );
-  }
 }
