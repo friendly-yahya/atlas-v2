@@ -1,12 +1,17 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:firebase_core/firebase_core.dart';
 
 // ignore: always_use_package_imports
 import 'core/env/app_env.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initialize(
+    options: DefaultFirebaseOptions.currentPlateform,
+  );
 
   await Supabase.initialize(
     url: AppEnv.supabaseUrl,

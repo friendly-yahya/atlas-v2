@@ -275,3 +275,603 @@ create trigger set_updated_at before update on slots for each row execute functi
 create trigger set_updated_at before update on bookings for each row execute function update_updated_at();
 create trigger set_updated_at before update on payments for each row execute function update_updated_at();
 create trigger set_updated_at before update on conversations for each row execute function update_updated_at();
+
+
+alter table profiles                  enable row level security;
+alter table operator_profile          enable row level security;
+alter table operator_certifications   enable row level security;
+alter table operator_insurance        enable row level security;
+alter table operator_equipment        enable row level security;
+alter table operator_languages        enable row level security;
+alter table health_form_templates     enable row level security;
+alter table health_form_fields        enable row level security;
+alter table offers                    enable row level security;
+alter table offer_includes            enable row level security;
+alter table offer_schedule            enable row level security;
+alter table slots                     enable row level security;
+alter table bookings                  enable row level security;
+alter table reviews                   enable row level security;
+alter table payments                  enable row level security;
+alter table health_form_submissions   enable row level security;
+alter table health_form_answers       enable row level security;
+alter table conversations             enable row level security;
+alter table messages                  enable row level security;
+alter table likes                     enable row level security;
+alter table shares                    enable row level security;
+
+create policy "profiles: select"
+  on profiles for select
+  to authenticated
+  using (
+    role = 'operator'
+    or auth.uid() = id
+    or exists (
+      select 1 from bookings b
+      join slots s on s.id = b.slot_id
+      join offers o on o.id = s.offer_id
+      join operator_profile op on op.id = o.operator_id
+      where b.client_id = profiles.id
+      and op.user_id = auth.uid()
+    )
+  );
+create policy "profiles: insert own"
+    on profiles for insert
+    to authenticated
+    with check (auth.uid() = id);
+
+create policy "profiles: update own"
+    on profiles for update
+    to authenticated
+    using (auth.uid() = id) 
+    with check (auth.uid() = id);
+
+create policy "operator_profile: authenticated can read all"
+  on operator_profile for select
+  to authenticated
+  using (true);
+
+create policy "operator_profile: insert own"
+  on operator_profile for insert
+  to authenticated
+  with check (auth.uid() = user_id);
+
+create policy "operator_profile: update own"
+  on operator_profile for update
+  to authenticated
+  using (auth.uid() = user_id);
+create policy "operator_certifications: insert own"
+  on operator_certifications for insert
+  to authenticated
+  with check (
+    auth.uid() = (
+      select user_id from operator_profile
+      where id = operator_id
+    )
+  );
+
+create policy "operator_certifications: update own"
+  on operator_certifications for update
+  to authenticated
+  using (
+    auth.uid() = (
+      select user_id from operator_profile
+      where id = operator_id
+    )
+  );
+
+create policy "operator_certifications: authenticated can read all"
+  on operator_certifications for select
+  to authenticated
+  using (true);
+
+  create policy "operator_insurance: authenticated can read all"
+  on operator_insurance for select
+  to authenticated
+  using (true);
+
+create policy "operator_insurance: insert own"
+  on operator_insurance for insert
+  to authenticated
+  with check (
+    auth.uid() = (
+      select user_id from operator_profile
+      where id = operator_id
+    )
+  );
+
+create policy "operator_insurance: update own"
+  on operator_insurance for update
+  to authenticated
+  using (
+    auth.uid() = (
+      select user_id from operator_profile
+      where id = operator_id
+    )
+  );
+
+create policy "operator_equipment: authenticated can read all"
+  on operator_equipment for select
+  to authenticated
+  using (true);
+
+create policy "operator_equipment: insert own"
+  on operator_equipment for insert
+  to authenticated
+  with check (
+    auth.uid() = (
+      select user_id from operator_profile
+      where id = operator_id
+    )
+  );
+
+create policy "operator_equipment: update own"
+  on operator_equipment for update
+  to authenticated
+  using (
+    auth.uid() = (
+      select user_id from operator_profile
+      where id = operator_id
+    )
+  );
+
+
+
+create policy "operator_languages: authenticated can read all"
+  on operator_languages for select
+  to authenticated
+  using (true);
+
+create policy "operator_languages: insert own"
+  on operator_languages for insert
+  to authenticated
+  with check (
+    auth.uid() = (
+      select user_id from operator_profile
+      where id = operator_id
+    )
+  );
+
+create policy "operator_languages: update own"
+  on operator_languages for update
+  to authenticated
+  using (
+    auth.uid() = (
+      select user_id from operator_profile
+      where id = operator_id
+    )
+  );
+
+create policy "operator_languages: delete own"
+  on operator_languages for delete
+  to authenticated
+  using (
+    auth.uid() = (
+      select user_id from operator_profile
+      where id = operator_id
+    )
+  );
+
+create policy "health_form_templates: authenticated can read all"
+  on health_form_templates for select
+  to authenticated
+  using (true);
+
+create policy "health_form_templates: insert own"
+  on health_form_templates for insert
+  to authenticated
+  with check (auth.uid() = created_by);
+
+create policy "health_form_templates: update own"
+  on health_form_templates for update
+  to authenticated
+  using (auth.uid() = created_by);
+
+create policy "health_form_fields: authenticated can read all"
+  on health_form_fields for select
+  to authenticated
+  using (true);
+
+create policy "health_form_fields: insert own"
+  on health_form_fields for insert
+  to authenticated
+  with check (
+    auth.uid() = (
+      select created_by from health_form_templates
+      where id = template_id
+    )
+  );
+
+create policy "health_form_fields: update own"
+  on health_form_fields for update
+  to authenticated
+  using (
+    auth.uid() = (
+      select created_by from health_form_templates
+      where id = template_id
+    )
+  );
+create policy "offers: clients see active, operators see own"
+  on offers for select
+  to authenticated
+  using (
+    status = 'active'
+    or auth.uid() = (
+      select user_id from operator_profile
+      where id = operator_id
+    )
+  );
+create policy "offers: insert own"
+  on offers for insert
+  to authenticated
+  with check (
+    auth.uid() = (
+      select user_id from operator_profile
+      where id = operator_id
+    )
+  );
+
+create policy "offers: update own"
+  on offers for update
+  to authenticated
+  using (
+    auth.uid() = (
+      select user_id from operator_profile
+      where id = operator_id
+    )
+  );
+create policy "offer_includes: authenticated can read all"
+  on offer_includes for select
+  to authenticated
+  using (true);
+
+create policy "offer_includes: only op can add own"
+  on offer_includes for insert
+  to authenticated
+  with check (
+    auth.uid() = (
+      select op.user_id 
+      from operator_profile op
+      join offers o on o.operator_id = op.id
+      where o.id = offer_id
+
+    )
+  );
+create policy "offer_includes: delete own"
+  on offer_includes for delete
+  to authenticated
+  using (
+    auth.uid() = (
+      select op.user_id
+      from operator_profile op
+      join offers o on o.operator_id = op.id
+      where o.id = offer_id
+    )
+  );
+
+create policy "offer_includes: update own"
+  on offer_includes for update
+  to authenticated
+  using (
+    auth.uid() = (
+      select op.user_id
+      from operator_profile op
+      join offers o on o.operator_id = op.id
+      where o.id = offer_id
+    )
+  );
+
+create policy "offer_schedule: authenticated can read all"
+  on offer_schedule for select
+  to authenticated
+  using (true);
+
+create policy "offer_schedule: insert own"
+  on offer_schedule for insert
+  to authenticated
+  with check (
+    auth.uid() = (
+      select op.user_id
+      from operator_profile op
+      join offers o on o.operator_id = op.id
+      where o.id = offer_id
+    )
+  );
+
+create policy "offer_schedule: update own"
+  on offer_schedule for update
+  to authenticated
+  using (
+    auth.uid() = (
+      select op.user_id
+      from operator_profile op
+      join offers o on o.operator_id = op.id
+      where o.id = offer_id
+    )
+  );
+
+create policy "offer_schedule: delete own"
+  on offer_schedule for delete
+  to authenticated
+  using (
+    auth.uid() = (
+      select op.user_id
+      from operator_profile op
+      join offers o on o.operator_id = op.id
+      where o.id = offer_id
+    )
+  );
+
+create policy "slots: authenticated can read all"
+  on slots for select
+  to authenticated
+  using (true);
+
+create policy "slots: insert own"
+  on slots for insert
+  to authenticated
+  with check (
+    auth.uid() = (
+      select op.user_id
+      from operator_profile op
+      join offers o on o.operator_id = op.id
+      where o.id = offer_id
+    )
+  );
+
+create policy "slots: update own"
+  on slots for update
+  to authenticated
+  using (
+    auth.uid() = (
+      select op.user_id
+      from operator_profile op
+      join offers o on o.operator_id = op.id
+      where o.id = offer_id
+    )
+  );
+
+create policy "slots: delete own"
+  on slots for delete
+  to authenticated
+  using (
+    auth.uid() = (
+      select op.user_id
+      from operator_profile op
+      join offers o on o.operator_id = op.id
+      where o.id = offer_id
+    )
+  );
+
+create policy "bookings: client sees own, operator sees for their offers"
+  on bookings for select
+  to authenticated
+  using (
+    auth.uid() = client_id
+    or auth.uid() = (
+      select op.user_id
+      from operator_profile op
+      join offers o on o.operator_id = op.id
+      join slots s on s.offer_id = o.id
+      where s.id = slot_id
+    )
+  );
+create policy "bookings: client inserts own"
+  on bookings for insert
+  to authenticated
+  with check (auth.uid() = client_id);
+create policy "bookings: client and operator can update"
+  on bookings for update
+  to authenticated
+  using (
+    auth.uid() = client_id
+    or auth.uid() = (
+      select op.user_id
+      from operator_profile op
+      join offers o on o.operator_id = op.id
+      join slots s on s.offer_id = o.id
+      where s.id = slot_id
+    )
+  );
+
+create policy "reviews: authenticated can read all"
+  on reviews for select
+  to authenticated
+  using (true);
+
+create policy "reviews: client inserts own on completed booking"
+  on reviews for insert
+  to authenticated
+  with check (
+    auth.uid() = client_id
+    and auth.uid() = (
+      select client_id from bookings
+      where id = booking_id
+      and status = 'completed'
+    )
+  );
+----really must be careful with reviews double check, and test later
+create policy "reviews: client updates own"
+  on reviews for update
+  to authenticated
+  using (auth.uid() = client_id);
+
+-- no need for insert can be done by third partie prov
+
+create policy "payments: client sees own, operator sees for their offers"
+  on payments for select
+  to authenticated
+  using (
+    auth.uid() = (
+      select client_id from bookings where id = booking_id
+    )
+    or auth.uid() = (
+      select op.user_id
+      from operator_profile op
+      join offers o on o.operator_id = op.id
+      join slots s on s.offer_id = o.id
+      join bookings b on b.slot_id = s.id
+      where b.id = booking_id
+    )
+  );
+
+--client sees own, operator sees for their bookings
+create policy "health_form_submissions: client and operator can read"
+  on health_form_submissions for select
+  to authenticated
+  using (
+    auth.uid() = (
+      select client_id from bookings where id = booking_id
+    )
+    or auth.uid() = (
+      select op.user_id
+      from operator_profile op
+      join offers o on o.operator_id = op.id
+      join slots s on s.offer_id = o.id
+      join bookings b on b.slot_id = s.id
+      where b.id = booking_id
+    )
+  );
+
+--only the client who made the booking
+create policy "health_form_submissions: client inserts own"
+  on health_form_submissions for insert
+  to authenticated
+  with check (
+    auth.uid() = (
+      select client_id from bookings where id = booking_id
+    )
+  );
+
+create policy "health_form_answers: client and operator can read"
+  on health_form_answers for select
+  to authenticated
+  using (
+    auth.uid() = (
+      select b.client_id
+      from bookings b
+      join health_form_submissions hfs on hfs.booking_id = b.id
+      where hfs.id = submission_id
+    )
+    or auth.uid() = (
+      select op.user_id
+      from operator_profile op
+      join offers o on o.operator_id = op.id
+      join slots s on s.offer_id = o.id
+      join bookings b on b.slot_id = s.id
+      join health_form_submissions hfs on hfs.booking_id = b.id
+      where hfs.id = submission_id
+    )
+  );
+
+create policy "health_form_answers: client inserts own"
+  on health_form_answers for insert
+  to authenticated
+  with check (
+    auth.uid() = (
+      select b.client_id
+      from bookings b
+      join health_form_submissions hfs on hfs.booking_id = b.id
+      where hfs.id = submission_id
+    )
+  );
+
+
+-- careful here one breach and i'm genuinly cooocked 
+
+create policy "conversations: participants can read"
+  on conversations for select
+  to authenticated
+  using (
+    auth.uid() = client_id
+    or auth.uid() = (
+      select user_id from operator_profile where id = operator_id
+    )
+  );
+
+create policy "conversations: client or operator of booking can create"
+  on conversations for insert
+  to authenticated
+  with check (
+    -- client can start convo with any operator (not other clients)
+    (auth.uid() = client_id and exists (
+      select 1 from operator_profile where id = operator_id
+    ))
+    -- operator can start convo only with clients who booked them
+    or (auth.uid() = (
+      select user_id from operator_profile where id = operator_id
+    ) and exists (
+      select 1 from bookings b
+      join slots s on s.id = b.slot_id
+      join offers o on o.id = s.offer_id
+      where o.operator_id = conversations.operator_id
+      and b.client_id = conversations.client_id
+    ))
+  );
+
+create policy "conversations: participants can update"
+  on conversations for update
+  to authenticated
+  using (
+    auth.uid() = client_id
+    or auth.uid() = (
+      select user_id from operator_profile where id = operator_id
+    )
+  );
+
+create policy "messages: only participants of the conversation"
+  on messages for select
+  to authenticated
+  using (
+    auth.uid() = (
+      select client_id from conversations where id = conversation_id
+    )
+    or auth.uid() = (
+      select op.user_id
+      from operator_profile op
+      join conversations c on c.operator_id = op.id
+      where c.id = conversation_id
+    )
+  );
+
+create policy "messages: only participants of the conversation can insert"
+  on messages for insert
+  to authenticated
+  with check (
+    auth.uid() = sender_id
+    and (
+      auth.uid() = (
+        select client_id from conversations where id = conversation_id
+      )
+      or auth.uid() = (
+        select op.user_id
+        from operator_profile op
+        join conversations c on c.operator_id = op.id
+        where c.id = conversation_id
+      )
+    )
+  );
+
+create policy "likes: client sees own"
+  on likes for select
+  to authenticated
+  using (auth.uid() = client_id);
+
+create policy "likes: client inserts own"
+  on likes for insert
+  to authenticated
+  with check (auth.uid() = client_id);
+
+create policy "likes: client deletes own"
+  on likes for delete
+  to authenticated
+  using (auth.uid() = client_id);
+
+create policy "shares: client sees own"
+  on shares for select
+  to authenticated
+  using (auth.uid() = client_id);
+
+create policy "shares: client inserts own"
+  on shares for insert
+  to authenticated
+  with check (auth.uid() = client_id);
