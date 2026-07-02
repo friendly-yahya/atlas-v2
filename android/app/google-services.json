@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "271431247390",
+    "project_id": "atlas-paragliding-v2-42ce5",
+    "storage_bucket": "atlas-paragliding-v2-42ce5.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:271431247390:android:6a0f829594be9a72fcf00f",
+        "android_client_info": {
+          "package_name": "com.example.atlas_paragliding_v2"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBWHZqqBnNg-q-fOP2XkXNH38DVfQqPvYs"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
