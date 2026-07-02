@@ -2,11 +2,18 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:atlas_paragliding_v2/app/router/app_routes.dart';
-
+import 'package:atlas_paragliding_v2/features/playground/theme_showcase_screen.dart';
+//temp
 final appRouterProvider = Provider<GoRouter>((ref) {
   return GoRouter(
-    initialLocation: AppRoutes.splash,
+//    initialLocation: AppRoutes.splash,
+    initialLocation: AppRoutes.showcase,
     routes: [
+//temp
+      GoRoute(
+        path: '/showcase',
+        builder: (context, state) => const ThemeShowcaseScreen(),
+      ),
       GoRoute(
         path: AppRoutes.splash,
         builder: (context, state) => const Scaffold(
