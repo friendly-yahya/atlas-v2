@@ -34,6 +34,7 @@ migrate_working_dir/
 /build/
 /coverage/
 /lib/repo.sql
+/lib/firebase_options.dart
 # Symbolication related
 app.*.symbols
 
