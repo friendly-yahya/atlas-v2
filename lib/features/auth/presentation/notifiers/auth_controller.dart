@@ -5,19 +5,22 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:atlas_paragliding_v2/features/auth/data/repositories/auth_repository.dart';
 
 
-final authControllerProvider = AsyncNotifierProvider<AuthController, User?>(() {
-  return AuthController();
+final authNotifierProvider = AsyncNotifierProvider<AuthNotifier, User?>(() {
+  return AuthNotifier();
+});
+final authStateStreamProvider = StreamProvider<AuthState>((ref) {
+  return ref.watch(authRepositoryProvider).authStateChanges;
 });
 
-class AuthController extends AsyncNotifier<User?>{
+class AuthNotifier extends AsyncNotifier<User?>{
   @override
   FutureOr<User?> build() {
     final repo = ref.read(authRepositoryProvider);
 
-    ref.listen(StreamProvider((_) => repo.authStateChanges), (previous, next) {
-      if (next is AsyncData) {
-        state = AsyncData(next.value!.session?.user);
-      }
+    ref.listen(authStateStreamProvider, (previous, next) {
+      next.whenData((authState) {
+        state = AsyncData(authState.session?.user);
+      });
     });
     return repo.currentUser;
   }
@@ -38,7 +41,7 @@ class AuthController extends AsyncNotifier<User?>{
       final response = await repo.signUpWithEmailPassword(email: email, password: password);
       return response.user;
     });
-
+  }
   Future<void> loginWithOAuth(OAuthProvider provider) async {
     state = const AsyncLoading();
     state = await AsyncValue.guard(() async {
@@ -94,4 +97,4 @@ class AuthController extends AsyncNotifier<User?>{
       return null; 
     });
   }
-}}
+}

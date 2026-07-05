@@ -1,8 +1,8 @@
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
-
+import 'package:atlas_paragliding_v2/core/network/supabase_provider.dart';
 final authRepositoryProvider = Provider<AuthRepository>((ref) {
-  return AuthRepository(supabase: Supabase.instance.client);
+  return AuthRepository(supabase: ref.watch(supabaseClientProvider));
 });
 
 class AuthRepository {
