@@ -19,9 +19,13 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final authState = ref.read(authNotifierProvider);
       if (authState.isLoading) return null;
       final loggedIn = authState.value != null;
-      final onAuthScreen = state.uri.path == AppRoutes.login || state.uri.path == AppRoutes.splash;
-      if (!loggedIn) return onAuthScreen ? null : AppRoutes.login;
-      if (loggedIn && onAuthScreen) return AppRoutes.clientHome;
+      final path = state.uri.path;
+      //final onAuthScreen = state.uri.path == AppRoutes.login || state.uri.path == AppRoutes.splash;
+      if (!loggedIn) {
+        return path == AppRoutes.login ? null : AppRoutes.login;
+        }
+      //if (loggedIn && onAuthScreen) return AppRoutes.clientHome;
+      if (path == AppRoutes.login || path == AppRoutes.splash){return AppRoutes.clientHome;}
       return null;
     },
     routes: [
