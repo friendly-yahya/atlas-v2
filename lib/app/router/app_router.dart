@@ -6,9 +6,9 @@ import 'package:atlas_paragliding_v2/app/router/router_refresh_stream.dart';
 import 'package:atlas_paragliding_v2/app/router/app_routes.dart';
 import 'package:atlas_paragliding_v2/features/playground/theme_showcase_screen.dart';
 import 'package:atlas_paragliding_v2/features/auth/presentation/notifiers/auth_controller.dart';
-import 'package:atlas_paragliding_v2/features/client/presentation/screens/client_home_screen.dart';
 import 'package:atlas_paragliding_v2/features/operator/presentation/screens/operator_home_screen.dart';
 import 'package:atlas_paragliding_v2/features/auth/presentation/screens/login_screen.dart';
+import 'package:atlas_paragliding_v2/app/router/client_shell_route.dart';
 final appRouterProvider = Provider<GoRouter>((ref) {
   final authStream = ref.watch(authRepositoryProvider).authStateChanges;
   return GoRouter(
@@ -43,10 +43,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         path: AppRoutes.login,
         builder: (context, state) => const LoginScreen(),
       ),
-      GoRoute(
-        path: AppRoutes.clientHome,
-        builder: (context, state) =>  const ClientHomeScreen(),
-      ),
+      clientShellRoute,
       GoRoute(
         path: AppRoutes.operatorHome,
         builder: (context, state) => const OperatorHomeScreen(),
