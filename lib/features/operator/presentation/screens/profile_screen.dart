@@ -15,8 +15,8 @@ class ProfileScreen extends StatelessWidget {
           children: [
             const Text('Profile'),
             TextButton(
-              onPressed: () => context.go(AppRoutes.operatorHome),
-              child: const Text('DEV: switch to operator'),
+              onPressed: () => context.go(AppRoutes.clientHome),
+              child: const Text('DEV: switch to client'),
             ),
           ],
         ),
