@@ -18,6 +18,7 @@ class AuthRepository {
     required String email,
     required String password,
   }) => _supabase.auth.signInWithPassword(email: email ,password: password);
+  
 
   Future<bool> signInWithOAuth(OAuthProvider provider) => 
     _supabase.auth.signInWithOAuth(
@@ -45,10 +46,19 @@ class AuthRepository {
     email: email,
     token: tokenCode,
     type: OtpType.email);
-  Future<AuthResponse> signUpWithEmailPassword({
+/*   Future<AuthResponse> signUpWithEmailPassword({
     required String email,
     required String password,
   }) => _supabase.auth.signUp(email: email,password: password);
-
+ */
+  Future<AuthResponse> signUpWithEmailPassword({
+    required String email,
+    required String password,
+    required String username,
+  }) => _supabase.auth.signUp(
+      email: email,
+      password: password,
+      data: {'username': username},
+    );
   Future<void> signOut() => _supabase.auth.signOut();
 }

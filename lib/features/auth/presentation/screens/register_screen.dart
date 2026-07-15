@@ -1,29 +1,33 @@
-// lib/features/auth/presentation/screens/login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
-import 'package:atlas_paragliding_v2/features/auth/presentation/notifiers/auth_controller.dart';
 import 'package:go_router/go_router.dart';
 import 'package:atlas_paragliding_v2/app/router/app_routes.dart';
-class LoginScreen extends ConsumerStatefulWidget {
-  const LoginScreen({super.key});
+import 'package:atlas_paragliding_v2/features/auth/presentation/notifiers/auth_controller.dart';
+
+
+class RegisterScreen extends ConsumerStatefulWidget  {
+  const RegisterScreen({super.key});
 
   @override
-  ConsumerState<LoginScreen> createState() => _LoginScreenState();
+  ConsumerState<RegisterScreen> createState() => _RegisterScreenState();
 }
 
-class _LoginScreenState extends ConsumerState<LoginScreen> {
+class _RegisterScreenState extends ConsumerState<RegisterScreen> {
+
+  final _usernameController = TextEditingController();
   final _emailController = TextEditingController();
   final _passwordController = TextEditingController();
 
   @override
   void dispose() {
+    _usernameController.dispose();
     _emailController.dispose();
     _passwordController.dispose();
     super.dispose();
-  }
-
+  }  
   @override
   Widget build(BuildContext context) {
+
     final authState = ref.watch(authNotifierProvider);
     final isLoading = authState.isLoading;
 
@@ -34,6 +38,11 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
           child: Column(
             mainAxisSize: MainAxisSize.min,
             children: [
+              TextField(
+                controller: _usernameController,
+                decoration: const InputDecoration(labelText: 'Username'),
+              ),
+              const SizedBox(height: 12),
               TextField(
                 controller: _emailController,
                 keyboardType: TextInputType.emailAddress,
@@ -55,26 +64,21 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                   ),
                 ),
               FilledButton(
-                onPressed: isLoading
-                    ? null
-                    : () => ref.read(authNotifierProvider.notifier).loginWithEmail(
-                          _emailController.text.trim(),
-                          _passwordController.text,
-                        ),
+                onPressed: isLoading 
+                ? null
+                : () => ref.read(authNotifierProvider.notifier).registerWithEmail(_emailController.text.trim(), _passwordController.text, _usernameController.text.trim()),
                 child: isLoading
                     ? const SizedBox(
                         height: 20,
                         width: 20,
                         child: CircularProgressIndicator(strokeWidth: 2),
                       )
-                    : const Text('Log in'),
+                    : const Text('Sign up'),
               ),
               const SizedBox(height: 12),
-              TextButton(
-                onPressed: () => context.go(AppRoutes.register),
-                child: const Text("Don't have an account? Sign up"),
+              TextButton(onPressed: () => context.go(AppRoutes.login), child: const Text('Already have an account? Log in'),
               ),
-            ],
+            ], 
           ),
         ),
       ),
