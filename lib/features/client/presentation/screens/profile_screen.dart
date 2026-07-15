@@ -2,12 +2,14 @@
 import 'package:flutter/material.dart';
 import 'package:go_router/go_router.dart';
 import 'package:atlas_paragliding_v2/app/router/app_routes.dart';
+import 'package:atlas_paragliding_v2/features/auth/presentation/notifiers/auth_controller.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 
-class ProfileScreen extends StatelessWidget {
+class ProfileScreen extends ConsumerWidget  {
   const ProfileScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     return Scaffold(
       body: Center(
         child: Column(
@@ -17,6 +19,10 @@ class ProfileScreen extends StatelessWidget {
             TextButton(
               onPressed: () => context.go(AppRoutes.operatorHome),
               child: const Text('DEV: switch to operator'),
+            ),
+            TextButton(
+              onPressed: () => ref.read(authNotifierProvider.notifier).logout(),
+              child: const Text('Log out'),
             ),
           ],
         ),

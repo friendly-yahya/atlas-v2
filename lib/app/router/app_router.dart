@@ -41,8 +41,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final role = roleState.value;
       final target = role == 'operator' ? AppRoutes.operatorHome : AppRoutes.clientHome;
       //if (loggedIn && onAuthScreen) return AppRoutes.clientHome;
-      if (path == AppRoutes.login || path == AppRoutes.splash){return target;}
-      return null;
+      if (path == AppRoutes.login || path == AppRoutes.splash || path == AppRoutes.register){return target;}
     },
     routes: [
 //temp
