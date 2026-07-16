@@ -8,16 +8,17 @@ import 'app/app.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
-
+debugPrint('before firebase: ${DateTime.now()}');
   await Firebase.initializeApp(
     options: DefaultFirebaseOptions.currentPlatform,
   );
+debugPrint('after firebase: ${DateTime.now()}');
 debugPrint('SUPABASE URL IN USE: ${AppEnv.supabaseUrl}');
   await Supabase.initialize(
     url: AppEnv.supabaseUrl,
     publishableKey: AppEnv.supabasePublishableKey,
   );
-  
+debugPrint('after supabase: ${DateTime.now()}');  
   runApp(
     const ProviderScope(
       child: AtlasApp()

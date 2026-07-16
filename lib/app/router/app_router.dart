@@ -10,6 +10,7 @@ import 'package:atlas_paragliding_v2/features/auth/presentation/screens/login_sc
 import 'package:atlas_paragliding_v2/app/router/client_shell_route.dart';
 import 'package:atlas_paragliding_v2/app/router/operator_shell_route.dart';
 import 'package:atlas_paragliding_v2/features/auth/presentation/notifiers/role_controller.dart';
+import 'package:flutter/foundation.dart' show kDebugMode;
 class _RouterRefreshNotifier extends ChangeNotifier {
   void refresh() => notifyListeners();
 }
@@ -44,11 +45,11 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       if (path == AppRoutes.login || path == AppRoutes.splash || path == AppRoutes.register){return target;}
     },
     routes: [
-//temp
-      GoRoute(
-        path: '/showcase',
-        builder: (context, state) => const ThemeShowcaseScreen(),
-      ),
+      if (kDebugMode)
+        GoRoute(
+          path: '/showcase',
+          builder: (context, state) => const ThemeShowcaseScreen(),
+        ),
       GoRoute(
         path: AppRoutes.splash,
         builder: (context, state) => const Scaffold(

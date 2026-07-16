@@ -1,7 +1,5 @@
 // features/client/presentation/screens/profile_screen.dart
 import 'package:flutter/material.dart';
-import 'package:go_router/go_router.dart';
-import 'package:atlas_paragliding_v2/app/router/app_routes.dart';
 import 'package:atlas_paragliding_v2/features/auth/presentation/notifiers/auth_controller.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 
@@ -16,10 +14,6 @@ class ProfileScreen extends ConsumerWidget  {
           mainAxisSize: MainAxisSize.min,
           children: [
             const Text('Profile'),
-            TextButton(
-              onPressed: () => context.go(AppRoutes.operatorHome),
-              child: const Text('DEV: switch to operator'),
-            ),
             TextButton(
               onPressed: () => ref.read(authNotifierProvider.notifier).logout(),
               child: const Text('Log out'),
