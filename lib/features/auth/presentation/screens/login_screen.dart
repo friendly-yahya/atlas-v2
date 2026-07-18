@@ -1,4 +1,4 @@
-// lib/features/auth/presentation/screens/login_screen.dart
+/* // lib/features/auth/presentation/screens/login_screen.dart
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:atlas_paragliding_v2/features/auth/presentation/notifiers/auth_controller.dart';
@@ -74,10 +74,14 @@ class _LoginScreenState extends ConsumerState<LoginScreen> {
                 onPressed: () => context.go(AppRoutes.register),
                 child: const Text("Don't have an account? Sign up"),
               ),
+              TextButton(
+                onPressed: () => context.go(AppRoutes.emailOtp),
+                child: const Text('Log in with a code instead'),
+              ),
             ],
           ),
         ),
       ),
     );
   }
-}
+} */

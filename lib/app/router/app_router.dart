@@ -3,13 +3,12 @@ import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
 import 'package:atlas_paragliding_v2/app/router/app_routes.dart';
-import 'package:atlas_paragliding_v2/features/auth/presentation/screens/register_screen.dart';
 import 'package:atlas_paragliding_v2/features/playground/theme_showcase_screen.dart';
 import 'package:atlas_paragliding_v2/features/auth/presentation/notifiers/auth_controller.dart';
-import 'package:atlas_paragliding_v2/features/auth/presentation/screens/login_screen.dart';
 import 'package:atlas_paragliding_v2/app/router/client_shell_route.dart';
 import 'package:atlas_paragliding_v2/app/router/operator_shell_route.dart';
 import 'package:atlas_paragliding_v2/features/auth/presentation/notifiers/role_controller.dart';
+import 'package:atlas_paragliding_v2/features/auth/presentation/screens/auth_entry_screen.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
 class _RouterRefreshNotifier extends ChangeNotifier {
   void refresh() => notifyListeners();
@@ -33,8 +32,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final path = state.uri.path;
       //final onAuthScreen = state.uri.path == AppRoutes.login || state.uri.path == AppRoutes.splash;
       if (!loggedIn) {
-        final onAuthScreen = path == AppRoutes.login || path == AppRoutes.register;
-        return onAuthScreen ? null : AppRoutes.login;
+      return path == AppRoutes.login ? null : AppRoutes.login;
       }
       final roleState = ref.read(roleNotifierProvider);
       if(roleState.isLoading) return null;
@@ -42,7 +40,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       final role = roleState.value;
       final target = role == 'operator' ? AppRoutes.operatorHome : AppRoutes.clientHome;
       //if (loggedIn && onAuthScreen) return AppRoutes.clientHome;
-      if (path == AppRoutes.login || path == AppRoutes.splash || path == AppRoutes.register){return target;}
+      if (path == AppRoutes.login || path == AppRoutes.splash) return target;
     },
     routes: [
       if (kDebugMode)
@@ -57,11 +55,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         )),
       GoRoute(
         path: AppRoutes.login,
-        builder: (context, state) => const LoginScreen(),
-      ),
-      GoRoute(
-        path: AppRoutes.register,
-        builder: (context, state) => const RegisterScreen(),
+        builder: (context, state) => const AuthEntryScreen(),
       ),
       clientShellRoute,
       operatorShellRoute,
