@@ -10,6 +10,7 @@ import 'package:atlas_paragliding_v2/app/router/operator_shell_route.dart';
 import 'package:atlas_paragliding_v2/features/auth/presentation/notifiers/role_controller.dart';
 import 'package:atlas_paragliding_v2/features/auth/presentation/screens/auth_entry_screen.dart';
 import 'package:flutter/foundation.dart' show kDebugMode;
+import 'package:atlas_paragliding_v2/features/operator/presentation/screens/become_operator_screen.dart';
 class _RouterRefreshNotifier extends ChangeNotifier {
   void refresh() => notifyListeners();
 }
@@ -56,6 +57,10 @@ final appRouterProvider = Provider<GoRouter>((ref) {
       GoRoute(
         path: AppRoutes.login,
         builder: (context, state) => const AuthEntryScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.becomeOperator,
+        builder: (context, state) => const BecomeOperatorScreen(),
       ),
       clientShellRoute,
       operatorShellRoute,

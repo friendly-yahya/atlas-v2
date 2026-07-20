@@ -4,4 +4,5 @@ abstract class AppRoutes {
   static const showcase = '/showcase';
   static const clientHome = '/client/home';
   static const operatorHome = '/operator/home';
+  static const becomeOperator = '/become-operator';
 }
