@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-
+import 'package:atlas_paragliding_v2/l10n/generated/app_localizations.dart';
 class BecomeOperatorScreen extends StatefulWidget {
   const BecomeOperatorScreen({super.key});
 
@@ -65,6 +65,7 @@ class _BecomeOperatorScreenState extends State<BecomeOperatorScreen> {
                   'Tell us who you are',
                   style: Theme.of(context).textTheme.headlineSmall,
                 ),
+                Text('LOCALE TEST: ${AppLocalizations.of(context)!.appTitle}'),
                 const SizedBox(height: 8),
                 Text(
                   "This must match your government ID exactly — it's checked during verification.",

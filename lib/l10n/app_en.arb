@@ -1,0 +1,5 @@
+{
+  "@@locale": "en",
+  "appTitle": "Atlas",
+  "@appTitle": {"description": "The app's name, shown in the OS app switcher"}
+}
