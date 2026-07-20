@@ -5,7 +5,6 @@ import 'package:atlas_paragliding_v2/core/theme/app_theme.dart';
 import 'package:atlas_paragliding_v2/core/theme/theme_provider.dart';
 import 'package:atlas_paragliding_v2/core/localization/locale_provider.dart';
 import 'package:atlas_paragliding_v2/l10n/generated/app_localizations.dart';
-import 'package:flutter_localizations/flutter_localizations.dart';
 //temp
 class AtlasApp extends ConsumerWidget {
   const AtlasApp({super.key});
