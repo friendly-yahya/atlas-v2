@@ -50,7 +50,8 @@ class _BecomeOperatorScreenState extends State<BecomeOperatorScreen> {
     }
   final draft = OperatorApplicationDraft(
     fullLegalName: _nameController.text.trim(), 
-    fullLegalNameAr:_idType == 'cin' ? _nameController.text.trim() : null,
+    //fullLegalNameAr:_idType == 'cin' ? _nameController.text.trim() : null,
+    fullLegalNameAr: null,
     country: _countryController.text.trim(), 
     dateOfBirth: _dateOfBirth!, 
     idType: _idType, 
