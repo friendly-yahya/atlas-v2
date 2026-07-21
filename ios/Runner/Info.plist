@@ -45,5 +45,9 @@
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+	<key>NSCameraUsageDescription</key>
+	<string>Atlas needs camera access to scan your ID document for operator verification.</string>
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Atlas needs photo library access so you can upload an existing ID photo.</string>
 </dict>
 </plist>

@@ -1,4 +1,7 @@
 import 'package:flutter/material.dart';
+import 'package:atlas_paragliding_v2/features/operator/domain/operator_application_draft.dart';
+import 'package:atlas_paragliding_v2/features/operator/presentation/screens/id_document_capture_screen.dart';
+
 
 class BecomeOperatorScreen extends StatefulWidget {
   const BecomeOperatorScreen({super.key});
@@ -11,11 +14,13 @@ class _BecomeOperatorScreenState extends State<BecomeOperatorScreen> {
   
   final _formKey = GlobalKey<FormState>();
   final _nameController = TextEditingController();
+  final _idNumberController = TextEditingController();
   final _countryController = TextEditingController(text: 'Morocco');
   DateTime? _dateOfBirth;
   String _idType = 'cin';
   @override
   void dispose() {
+    _idNumberController.dispose();
     _nameController.dispose();
     _countryController.dispose();
     super.dispose();
@@ -43,10 +48,18 @@ class _BecomeOperatorScreenState extends State<BecomeOperatorScreen> {
       );
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(
-        content: Text('$_idType selected. Next: ID scan (coming soon).'))
-    );
+  final draft = OperatorApplicationDraft(
+    fullLegalName: _nameController.text.trim(), 
+    fullLegalNameAr:_idType == 'cin' ? _nameController.text.trim() : null,
+    country: _countryController.text.trim(), 
+    dateOfBirth: _dateOfBirth!, 
+    idType: _idType, 
+    idNumber: _idNumberController.text.trim(),
+  );
+
+  Navigator.of(context).push(
+    MaterialPageRoute(builder: (context) => IdDocumentCaptureScreen(draft: draft))
+  );
   }
 
   @override
@@ -78,6 +91,15 @@ class _BecomeOperatorScreenState extends State<BecomeOperatorScreen> {
                     helperText: 'As it appears on your ID',
                   ),
                   validator: (value) => (value == null || value.trim().isEmpty) ? 'Full legal name is required' : null,
+                ),
+                const SizedBox(height: 16),
+                TextFormField(
+                  controller: _idNumberController,
+                  decoration: const InputDecoration(
+                    labelText:  'ID number on the card.',
+                    helperText: 'As it appears on your ID',
+                  ),
+                  validator: (value) => (value == null || value.trim().isEmpty) ? 'ID number is required' : null,
                 ),
                 const SizedBox(height: 16),
                 TextFormField(
