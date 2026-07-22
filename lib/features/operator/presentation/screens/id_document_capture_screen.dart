@@ -1,20 +1,25 @@
 import 'dart:io';
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:image_picker/image_picker.dart';
 import 'package:flutter_image_compress/flutter_image_compress.dart';
 import 'package:path_provider/path_provider.dart';
+import 'package:atlas_paragliding_v2/app/router/app_routes.dart';
+import 'package:atlas_paragliding_v2/features/auth/presentation/notifiers/role_controller.dart';
 import 'package:atlas_paragliding_v2/features/operator/domain/operator_application_draft.dart';
+import 'package:atlas_paragliding_v2/features/operator/data/repositories/operator_application_repository.dart';
+import 'package:go_router/go_router.dart';
 
 
-class IdDocumentCaptureScreen extends StatefulWidget {
+class IdDocumentCaptureScreen extends ConsumerStatefulWidget {
   final OperatorApplicationDraft draft;
   const IdDocumentCaptureScreen({super.key, required this.draft});
 
   @override
-  State<IdDocumentCaptureScreen> createState() => _IdDocumentCaptureScreenState();
+  ConsumerState<IdDocumentCaptureScreen> createState() => _IdDocumentCaptureScreenState();
 }
 
-class _IdDocumentCaptureScreenState extends State<IdDocumentCaptureScreen> {
+class _IdDocumentCaptureScreenState extends ConsumerState<IdDocumentCaptureScreen> {
   File? _frontImage;
   File? _backImage;
   bool _busy = false;
@@ -72,7 +77,7 @@ class _IdDocumentCaptureScreenState extends State<IdDocumentCaptureScreen> {
     });
   }
 
-  void _finish() {
+  Future<void> _finish() async{
     final ready = _frontImage != null && (!_needsBack || _backImage != null);
     if (!ready) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -80,9 +85,24 @@ class _IdDocumentCaptureScreenState extends State<IdDocumentCaptureScreen> {
       );
       return;
     }
-    ScaffoldMessenger.of(context).showSnackBar(
-      const SnackBar(content: Text('Captured — upload wiring comes next.')),
-    );
+    setState(() => _busy = true);
+    try {
+      final draft = widget.draft.copyWith(
+        idFrontImage: _frontImage,
+        idBackImage: _backImage,
+      );  
+      await ref.read(operatorApplicationRepositoryProvider).submit(draft);
+      await ref.read(roleNotifierProvider.notifier).refresh();  
+      if (!mounted) return;
+      context.go(AppRoutes.operatorHome);    
+    } catch (e) {
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        SnackBar(content: Text('Something went wrong: $e')),
+      );
+    } finally {
+      if (mounted) setState(() => _busy = false);
+    }
   }
 
   Widget _slot({required String label, required File? image, required VoidCallback onTap}) {
