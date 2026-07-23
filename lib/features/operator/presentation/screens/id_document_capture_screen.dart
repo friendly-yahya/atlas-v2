@@ -9,6 +9,7 @@ import 'package:atlas_paragliding_v2/features/auth/presentation/notifiers/role_c
 import 'package:atlas_paragliding_v2/features/operator/domain/operator_application_draft.dart';
 import 'package:atlas_paragliding_v2/features/operator/data/repositories/operator_application_repository.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 
 class IdDocumentCaptureScreen extends ConsumerStatefulWidget {
@@ -90,15 +91,24 @@ class _IdDocumentCaptureScreenState extends ConsumerState<IdDocumentCaptureScree
       final draft = widget.draft.copyWith(
         idFrontImage: _frontImage,
         idBackImage: _backImage,
-      );  
+      );
       await ref.read(operatorApplicationRepositoryProvider).submit(draft);
-      await ref.read(roleNotifierProvider.notifier).refresh();  
+      await ref.read(roleNotifierProvider.notifier).refresh();
       if (!mounted) return;
-      context.go(AppRoutes.operatorHome);    
-    } catch (e) {
+      context.go(AppRoutes.operatorHome);
+    } catch (e, stackTrace) {
+      if (e is PostgrestException) {
+        // ignore: avoid_print
+        print('POSTGREST ERROR — message: ${e.message}, code: ${e.code}, details: ${e.details}, hint: ${e.hint}');
+      } else {
+        // ignore: avoid_print
+        print('SUBMIT ERROR: $e');
+      }
+      // ignore: avoid_print
+      print('STACK TRACE: $stackTrace');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
-        SnackBar(content: Text('Something went wrong: $e')),
+        const SnackBar(content: Text('Something went wrong — check terminal')),
       );
     } finally {
       if (mounted) setState(() => _busy = false);
