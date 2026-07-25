@@ -3,7 +3,6 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:atlas_paragliding_v2/core/network/supabase_provider.dart';
 import 'package:atlas_paragliding_v2/features/operator/domain/operator_application_draft.dart';
 
-import 'dart:convert';
 final operatorApplicationRepositoryProvider = Provider<OperatorApplicationRepository>((ref) {
   return OperatorApplicationRepository(
     supabase: ref.watch(supabaseClientProvider)
