@@ -23,7 +23,7 @@ class _CompleteProfileScreenState extends ConsumerState<CompleteProfileScreen> {
   final _refundController = TextEditingController(text: _defaultRefundPolicy);
   bool _loading = true;
   bool _saving = false;
-
+  String _status = 'draft';
   @override
   void initState() {
     super.initState();
@@ -39,6 +39,7 @@ Future<void> _loadExisting() async {
     _yearsController.text = data['years_of_experience']?.toString() ?? '';
     _cancellationController.text = (data['cancellation_policy'] as String?) ?? _defaultCancellationPolicy;
     _refundController.text = (data['refund_policy'] as String?) ?? _defaultRefundPolicy;
+    _status = (data['verification_status'] as String?) ?? 'draft';
   }
   setState(() => _loading = false);
 }
@@ -63,6 +64,38 @@ Future<void> _loadExisting() async {
     } catch (e) {
       // ignore: avoid_print
       print('PROFILE SAVE ERROR: $e');
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Something went wrong — check terminal')),
+      );
+    } finally {
+      if (mounted) setState(() => _saving = false);
+    }
+  }
+
+  Future<void> _submitForReview() async {
+    if (!_formKey.currentState!.validate()) {
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Finish all fields before submitting')),
+      );
+      return;
+    }
+    setState(() => _saving = true);
+    try {
+      await ref.read(operatorProfileRepositoryProvider).updateProfile(
+            bio: _bioController.text.trim(),
+            yearsOfExperience: int.parse(_yearsController.text.trim()),
+            cancellationPolicy: _cancellationController.text.trim(),
+            refundPolicy: _refundController.text.trim(),
+          );
+      await ref.read(operatorProfileRepositoryProvider).submitForReview();
+      if (!mounted) return;
+      ScaffoldMessenger.of(context).showSnackBar(
+        const SnackBar(content: Text('Submitted for review')),
+      );
+    } catch (e) {
+      // ignore: avoid_print
+      print('SUBMIT FOR REVIEW ERROR: $e');
       if (!mounted) return;
       ScaffoldMessenger.of(context).showSnackBar(
         const SnackBar(content: Text('Something went wrong — check terminal')),
@@ -133,6 +166,30 @@ Future<void> _loadExisting() async {
                         )
                       : const Text('Save'),
                 ),
+                const SizedBox(height: 16),
+                if (_status == 'draft')
+                  OutlinedButton(
+                    onPressed: _saving ? null : _submitForReview,
+                    child: const Text('Submit for review'),
+                  )
+                else if (_status == 'submitted')
+                  const Padding(
+                    padding: EdgeInsets.only(top: 16),
+                    child: Text(
+                      'Under review — you\'ll be notified when approved',
+                      style: TextStyle(color: Colors.orange),
+                      textAlign: TextAlign.center,
+                    ),
+                  )
+                else if (_status == 'approved')
+                  const Padding(
+                    padding: EdgeInsets.only(top: 16),
+                    child: Text(
+                      'Approved — you can post offers',
+                      style: TextStyle(color: Colors.green),
+                      textAlign: TextAlign.center,
+                    ),
+                  ),
               ],
             )
           ),

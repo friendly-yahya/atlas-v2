@@ -35,4 +35,8 @@ class OperatorProfileRepository {
       'refund_policy': refundPolicy
     }).eq('user_id', uid);
   }
+
+  Future<void> submitForReview() async {
+  await _supabase.rpc('submit_operator_application_for_review');
+}
 }
