@@ -5,8 +5,8 @@ sealed class AppException implements Exception {
   String toString() => message;
 }
 
-final class NetworkExecption extends AppException {
-  const NetworkExecption([super.message = 'Network error. Please try again.']);
+final class NetworkException extends AppException {
+  const NetworkException([super.message = 'Network error. Please try again.']);
 }
 
 final class UnauthorizedException extends AppException {
