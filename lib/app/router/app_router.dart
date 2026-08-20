@@ -59,6 +59,26 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         builder: (context, state) => const AuthEntryScreen(),
       ),
       GoRoute(
+        path: AppRoutes.welcome,
+        builder: (context, state) => const WelcomeScreen(), // placeholder you'll build later
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingActivity,
+        builder: (context, state) => const ActivityPickerScreen(),
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingIdentity,
+        builder: (context, state) => const IdentityScreen(), // Screen 2 — build next
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingPhone,
+        builder: (context, state) => const PhoneScreen(), // Screen 3 — build next
+      ),
+      GoRoute(
+        path: AppRoutes.onboardingOtp,
+        builder: (context, state) => const OtpScreen(), // Screen 4 — build next
+      ),
+      GoRoute(
         path: AppRoutes.becomeOperator,
         builder: (context, state) => const BecomeOperatorScreen(),
       ),

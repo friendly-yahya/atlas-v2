@@ -51,7 +51,7 @@ extension OnboardingStateX on OnboardingState {
     return groups;
   }
 
-  static String groupLabel(String groupKey) {
+  String groupLabel(String groupKey) {
     return switch (groupKey) {
       'water' => 'Water Activities',
       'aerial' => 'Aerial Activities',
