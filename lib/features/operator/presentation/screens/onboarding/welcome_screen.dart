@@ -63,7 +63,7 @@ class WelcomeScreen extends StatelessWidget {
               const SizedBox(height: 12),
 
               // Secondary CTA
-              SizedBox(
+              /* SizedBox(
                 width: double.infinity,
                 child: OutlinedButton.icon(
                   onPressed: () => context.go(AppRoutes.login),
@@ -75,6 +75,20 @@ class WelcomeScreen extends StatelessWidget {
                       borderRadius: BorderRadius.circular(10),
                     ),
                   ),
+                ),
+              ), */
+              SizedBox(
+                width: double.infinity,
+                child: OutlinedButton(
+                  onPressed: () {
+                    debugPrint('=== DEV BYPASS: Skip auth, go to onboarding ===');
+                    context.go(AppRoutes.onboardingActivity);
+                  },
+                  style: OutlinedButton.styleFrom(
+                    minimumSize: const Size.fromHeight(48),
+                    shape: RoundedRectangleBorder(borderRadius: BorderRadius.circular(10)),
+                  ),
+                  child: const Text('DEV: Skip to onboarding'),
                 ),
               ),
               const SizedBox(height: 16),
