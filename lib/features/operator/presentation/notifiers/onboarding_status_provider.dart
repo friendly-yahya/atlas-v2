@@ -1,12 +1,11 @@
-// Checks onboarding completion status and routes user to correct step.
-// Runs on every app launch / auth state change.
-// Long-term: cache result in memory to avoid repeated Supabase calls.
 
 import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:atlas_paragliding_v2/core/network/supabase_provider.dart';
-
+import 'package:atlas_paragliding_v2/app/router/app_routes.dart';
+import 'package:atlas_paragliding_v2/features/auth/presentation/notifiers/auth_controller.dart';
+import 'package:flutter/foundation.dart' show kDebugMode, debugPrint;
 final onboardingStatusProvider = AsyncNotifierProvider<OnboardingStatusNotifier, OnboardingStatus>(
   () => OnboardingStatusNotifier(),
 );
@@ -25,9 +24,9 @@ class OnboardingStatus {
   bool get isComplete => hasActivities && hasIdentity && hasVerifiedPhone;
 
   String? get nextRoute {
-    if (!hasActivities) return '/onboarding/activity';
-    if (!hasIdentity) return '/onboarding/identity';
-    if (!hasVerifiedPhone) return '/onboarding/phone';
+    if (!hasActivities) return AppRoutes.onboardingActivity;
+    if (!hasIdentity) return AppRoutes.onboardingIdentity;
+    if (!hasVerifiedPhone) return AppRoutes.onboardingPhone;
     return null; // All done
   }
 }
@@ -35,29 +34,33 @@ class OnboardingStatus {
 class OnboardingStatusNotifier extends AsyncNotifier<OnboardingStatus> {
   @override
   Future<OnboardingStatus> build() async {
-    final user = ref.read(supabaseClientProvider).auth.currentUser;
-    if (user == null) return const OnboardingStatus();
+    // watch (not read) — this makes the provider automatically rebuild
+    // every time the logged-in user changes (login, logout, switch account).
+    final authUser = ref.watch(authNotifierProvider).value;
+    if (authUser == null) return const OnboardingStatus();
 
     final supabase = ref.read(supabaseClientProvider);
 
-    // Check identity (first_name in operator_profile)
     final profile = await supabase
         .from('operator_profile')
         .select('first_name, phone_verified')
-        .eq('id', user.id)
+        .eq('id', authUser.id)
         .maybeSingle();
 
-    // Check activities
     final activities = await supabase
         .from('operator_activity_categories')
         .select('activity_category_id')
-        .eq('operator_id', user.id);
+        .eq('operator_id', authUser.id);
 
-    return OnboardingStatus(
+    final status = OnboardingStatus(
       hasIdentity: profile != null && profile['first_name'] != null,
       hasVerifiedPhone: profile != null && profile['phone_verified'] == true,
       hasActivities: activities.isNotEmpty,
     );
+    debugPrint('onboardingStatus: user=${authUser.id} profile=$profile '
+        'activities=$activities isComplete=${status.isComplete} '
+        'nextRoute=${status.nextRoute}');
+    return status;
   }
 
   Future<void> refresh() async {

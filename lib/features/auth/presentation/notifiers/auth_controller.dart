@@ -3,7 +3,7 @@ import 'dart:async';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:atlas_paragliding_v2/features/auth/data/repositories/auth_repository.dart';
-
+import 'package:flutter/foundation.dart' show debugPrint;
 
 final authNotifierProvider = AsyncNotifierProvider<AuthNotifier, User?>(() {
   return AuthNotifier();
@@ -18,9 +18,18 @@ class AuthNotifier extends AsyncNotifier<User?>{
     final repo = ref.read(authRepositoryProvider);
 
     ref.listen(authStateStreamProvider, (previous, next) {
-      next.whenData((authState) {
-        state = AsyncData(authState.session?.user);
-      });
+      next.when(
+        data: (authState) {
+          debugPrint('AuthNotifier: stream emitted — event=${authState.event}, '
+              'user=${authState.session?.user.id}');
+          state = AsyncData(authState.session?.user);
+        },
+        error: (error, stack) {
+          debugPrint('AuthNotifier: auth stream ERROR — $error');
+          state = AsyncError(error, stack);
+        },
+        loading: () {},
+      );
     });
     return repo.currentUser;
   }

@@ -2,14 +2,17 @@
 // For now: functional OAuth gate with minimal styling.
 
 import 'package:flutter/material.dart';
+import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 import 'package:atlas_paragliding_v2/app/router/app_routes.dart';
+import 'package:atlas_paragliding_v2/features/auth/presentation/notifiers/auth_controller.dart';
 
-class WelcomeScreen extends StatelessWidget {
+class WelcomeScreen extends ConsumerWidget {
   const WelcomeScreen({super.key});
 
   @override
-  Widget build(BuildContext context) {
+  Widget build(BuildContext context, WidgetRef ref) {
     final theme = Theme.of(context);
 
     return Scaffold(
@@ -49,7 +52,16 @@ class WelcomeScreen extends StatelessWidget {
               SizedBox(
                 width: double.infinity,
                 child: FilledButton.icon(
-                  onPressed: () => context.go(AppRoutes.login),
+                  onPressed: () async {
+                    debugPrint('WelcomeScreen: Google button tapped');
+                    try {
+                      await ref
+                          .read(authNotifierProvider.notifier)
+                          .loginWithOAuth(OAuthProvider.google);
+                    } catch (e) {
+                      debugPrint('WelcomeScreen: Google OAuth threw — $e');
+                    }
+                  },
                   icon: const Icon(Icons.login),
                   label: const Text('Continue with Google'),
                   style: FilledButton.styleFrom(

@@ -95,6 +95,7 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 // COMPLETE REPLACEMENT — lib/app/router/app_router.dart
 // Fixed: ValueNotifier replaces broken RouterRefresh
 // Fixed: Routes extract state.extra for OTP phone number
+// Fixed: Restored operatorShellRoute and clientShellRoute (were dropped in rewrite)
 import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
@@ -114,15 +115,9 @@ import 'package:atlas_paragliding_v2/features/operator/presentation/screens/onbo
 import 'package:atlas_paragliding_v2/features/operator/presentation/screens/onboarding/phone_screen.dart';
 import 'package:atlas_paragliding_v2/features/operator/presentation/screens/onboarding/otp_screen.dart';
 
-// Operator
-import 'package:atlas_paragliding_v2/features/operator/presentation/screens/operator_home_screen.dart';
-
-// Client
-import 'package:atlas_paragliding_v2/features/client/presentation/shell/client_shell.dart';
-import 'package:atlas_paragliding_v2/features/client/presentation/screens/client_home_screen.dart';
-import 'package:atlas_paragliding_v2/features/client/presentation/screens/home_screen.dart';
-import 'package:atlas_paragliding_v2/features/client/presentation/screens/inbox_screen.dart';
-import 'package:atlas_paragliding_v2/features/client/presentation/screens/trips_screen.dart';
+// Shell routes
+import 'package:atlas_paragliding_v2/app/router/operator_shell_route.dart';
+import 'package:atlas_paragliding_v2/app/router/client_shell_route.dart';
 
 final appRouterProvider = Provider<GoRouter>((ref) {
   final refreshListenable = ValueNotifier<int>(0);
@@ -262,69 +257,8 @@ final appRouterProvider = Provider<GoRouter>((ref) {
         },
       ),
 
-      GoRoute(
-        path: AppRoutes.operatorHome,
-        builder: (context, state) {
-          return const OperatorHomeScreen();
-        },
-      ),
-
-      StatefulShellRoute.indexedStack(
-        builder: (
-          context,
-          state,
-          navigationShell,
-        ) {
-          return ClientShell(
-            navigationShell: navigationShell,
-          );
-        },
-        branches: [
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: AppRoutes.clientHome,
-                builder: (context, state) {
-                  return const ClientHomeScreen();
-                },
-              ),
-            ],
-          ),
-
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/trips',
-                builder: (context, state) {
-                  return const TripsScreen();
-                },
-              ),
-            ],
-          ),
-
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/inbox',
-                builder: (context, state) {
-                  return const InboxScreen();
-                },
-              ),
-            ],
-          ),
-
-          StatefulShellBranch(
-            routes: [
-              GoRoute(
-                path: '/home',
-                builder: (context, state) {
-                  return const HomeScreen();
-                },
-              ),
-            ],
-          ),
-        ],
-      ),
+      operatorShellRoute,
+      clientShellRoute,
     ],
   );
 
@@ -366,5 +300,6 @@ String? _readUserRole(Ref ref) {
 
    This temporary implementation defaults to client.
    */
+
   return null;
 }

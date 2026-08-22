@@ -17,6 +17,8 @@ debugPrint('SUPABASE URL IN USE: ${AppEnv.supabaseUrl}');
   await Supabase.initialize(
     url: AppEnv.supabaseUrl,
     publishableKey: AppEnv.supabasePublishableKey,
+    debug: true,
+    // rm   debug: true,in prod
   );
 debugPrint('after supabase: ${DateTime.now()}');  
   runApp(
