@@ -267,39 +267,24 @@ final appRouterProvider = Provider<GoRouter>((ref) {
   return router;
 });
 
+// after
 String _authenticatedDestination({
   required Ref ref,
-  required AsyncValue<dynamic> onboardingState,
+  required AsyncValue<OnboardingStatus> onboardingState,
 }) {
-  final onboardingStatus = onboardingState.value;
+  final status = onboardingState.value;
 
-  /*
-   * Adapt this section to the actual value returned by
-   * onboardingStatusProvider.
-   */
-
-  if (onboardingStatus == false) {
-    return AppRoutes.onboardingActivity;
+  // Onboarding data not loaded yet — stay on splash rather than guessing.
+  if (status == null) {
+    return AppRoutes.splash;
   }
 
-  final role = _readUserRole(ref);
-
-  if (role == 'operator') {
-    return AppRoutes.operatorHome;
+  if (!status.isComplete) {
+    return status.nextRoute ?? AppRoutes.onboardingActivity;
   }
 
-  return AppRoutes.clientHome;
-}
-
-String? _readUserRole(Ref ref) {
-  /*
-   * Replace this with your actual role provider, for example:
-
-   final roleState = ref.read(roleNotifierProvider);
-   return roleState.value;
-
-   This temporary implementation defaults to client.
-   */
-
-  return null;
+  // Onboarding complete → operator, since this app currently only
+  // onboards operators (no role provider wired up yet — client routing
+  // is unused until client-side auth exists).
+  return AppRoutes.operatorHome;
 }
