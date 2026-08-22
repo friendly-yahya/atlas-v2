@@ -3,7 +3,7 @@ import 'package:supabase_flutter/supabase_flutter.dart' hide AuthException;
 import 'package:atlas_paragliding_v2/core/network/supabase_provider.dart';
 import 'package:atlas_paragliding_v2/core/error/app_exception.dart' ;
 import '../../domain/activity_category.dart';
-
+import 'package:flutter/foundation.dart' show debugPrint;
 final onboardingRepositoryProvider = Provider<OnboardingRepository>((ref) {
   return OnboardingRepository(supabase: ref.watch(supabaseClientProvider));
 });
@@ -13,13 +13,15 @@ class OnboardingRepository {
 
   OnboardingRepository({required SupabaseClient supabase}) : _supabase = supabase;
 
-  Future<List<ActivityCategory>> fetchCategories() async {
-    try {
-      final response = await _supabase
-          .from('activity_categories')
-          .select('id, slug, name, category_group, description')
-          .eq('is_active', true)
-          .order('name');
+    Future<List<ActivityCategory>> fetchCategories() async {
+      debugPrint('fetchCategories: starting query');
+      try {
+        final response = await _supabase
+            .from('activity_categories')
+            .select('id, slug, name, category_group, description')
+            .eq('is_active', true)
+            .order('name');
+        debugPrint('fetchCategories: got ${(response as List).length} rows');
 
       return (response as List<dynamic>)
           .map((json) => ActivityCategory.fromJson(json as Map<String, dynamic>))

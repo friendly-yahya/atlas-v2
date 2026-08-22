@@ -95,14 +95,16 @@ final appRouterProvider = Provider<GoRouter>((ref) {
 // COMPLETE REPLACEMENT — lib/app/router/app_router.dart
 // Fixed: ValueNotifier replaces broken RouterRefresh
 // Fixed: Routes extract state.extra for OTP phone number
-
+import 'package:flutter/foundation.dart' show kDebugMode;
 import 'package:flutter/material.dart';
 import 'package:flutter_riverpod/flutter_riverpod.dart';
 import 'package:go_router/go_router.dart';
+
 import 'app_routes.dart';
 
 // Auth
 import 'package:atlas_paragliding_v2/features/auth/presentation/notifiers/auth_controller.dart';
+import 'package:atlas_paragliding_v2/features/auth/presentation/screens/auth_entry_screen.dart';
 
 // Onboarding
 import 'package:atlas_paragliding_v2/features/operator/presentation/notifiers/onboarding_status_provider.dart';
@@ -112,7 +114,7 @@ import 'package:atlas_paragliding_v2/features/operator/presentation/screens/onbo
 import 'package:atlas_paragliding_v2/features/operator/presentation/screens/onboarding/phone_screen.dart';
 import 'package:atlas_paragliding_v2/features/operator/presentation/screens/onboarding/otp_screen.dart';
 
-// Operator home
+// Operator
 import 'package:atlas_paragliding_v2/features/operator/presentation/screens/operator_home_screen.dart';
 
 // Client
@@ -121,108 +123,248 @@ import 'package:atlas_paragliding_v2/features/client/presentation/screens/client
 import 'package:atlas_paragliding_v2/features/client/presentation/screens/home_screen.dart';
 import 'package:atlas_paragliding_v2/features/client/presentation/screens/inbox_screen.dart';
 import 'package:atlas_paragliding_v2/features/client/presentation/screens/trips_screen.dart';
-import 'package:atlas_paragliding_v2/features/auth/presentation/screens/auth_entry_screen.dart';
+
 final appRouterProvider = Provider<GoRouter>((ref) {
-  // ValueNotifier that GoRouter watches. Incremented when auth/onboarding changes.
   final refreshListenable = ValueNotifier<int>(0);
 
-  // Listen to Riverpod providers → increment → GoRouter re-evaluates redirect
-  ref.listen(authNotifierProvider, (_, __) => refreshListenable.value++);
-  ref.listen(onboardingStatusProvider, (_, __) => refreshListenable.value++);
+  ref.listen(authNotifierProvider, (_, __) {
+    refreshListenable.value++;
+  });
 
-  return GoRouter(
-    refreshListenable: refreshListenable,
+  ref.listen(onboardingStatusProvider, (_, __) {
+    refreshListenable.value++;
+  });
+
+  ref.onDispose(refreshListenable.dispose);
+
+  final router = GoRouter(
     initialLocation: AppRoutes.splash,
+    refreshListenable: refreshListenable,
+
     redirect: (context, state) {
-      final authAsync = ref.read(authNotifierProvider);
-      final onboardingAsync = ref.read(onboardingStatusProvider);
+      final authState = ref.read(authNotifierProvider);
+      final onboardingState = ref.read(onboardingStatusProvider);
 
-      final isAuthenticated = authAsync.value != null;
-      final currentPath = state.matchedLocation;
+      final currentPath = state.uri.path;
 
-      final isAuthRoute = currentPath == AppRoutes.welcome ||
+      final isAuthLoading = authState.isLoading;
+      final isOnboardingLoading = onboardingState.isLoading;
+
+      final isAuthenticated = authState.value != null;
+
+      final isPublicRoute =
+          currentPath == AppRoutes.splash ||
+          currentPath == AppRoutes.welcome ||
           currentPath == AppRoutes.login;
-      final isOnboardingRoute = currentPath.startsWith('/onboarding');
 
-      // Not logged in → welcome screen
-      if (!isAuthenticated && !isAuthRoute) {
+      final isOnboardingRoute =
+          currentPath == AppRoutes.onboardingActivity ||
+          currentPath == AppRoutes.onboardingIdentity ||
+          currentPath == AppRoutes.onboardingPhone ||
+          currentPath == AppRoutes.onboardingOtp;
+
+      // Keep the splash screen visible while state is being loaded.
+      if (isAuthLoading || isOnboardingLoading) {
+        return currentPath == AppRoutes.splash
+            ? null
+            : AppRoutes.splash;
+      }
+
+      // User is not authenticated.
+      if (!isAuthenticated) {
+        if (currentPath == AppRoutes.welcome ||
+            currentPath == AppRoutes.login) {
+          return null;
+        }
+
+        // Allow onboarding only in debug mode, if desired.
+        if (kDebugMode && isOnboardingRoute) {
+          return null;
+        }
+
         return AppRoutes.welcome;
       }
 
-      // Logged in → check onboarding progress
-      if (isAuthenticated && onboardingAsync.hasValue) {
-        final status = onboardingAsync.value!;
-
-        // Already complete but on onboarding route → send home
-        if (isOnboardingRoute && status.isComplete) {
-          return AppRoutes.operatorHome;
-        }
-
-        // Incomplete and not on onboarding → send to next step
-        if (!isOnboardingRoute && !status.isComplete) {
-          return status.nextRoute ?? AppRoutes.operatorHome;
-        }
+      // Authenticated users should not remain on authentication screens.
+      if (currentPath == AppRoutes.splash ||
+          currentPath == AppRoutes.welcome ||
+          currentPath == AppRoutes.login) {
+        return _authenticatedDestination(
+          ref: ref,
+          onboardingState: onboardingState,
+        );
       }
 
-      return null; // No redirect
+      // Prevent authenticated users from being redirected away from
+      // onboarding routes until onboarding is complete.
+      if (isOnboardingRoute) {
+        return null;
+      }
+
+      return null;
     },
+
     routes: [
-      // Splash
       GoRoute(
         path: AppRoutes.splash,
-        builder: (context, state) => const Scaffold(
-          body: Center(child: CircularProgressIndicator()),
-        ),
+        builder: (context, state) {
+          return const Scaffold(
+            body: Center(
+              child: CircularProgressIndicator(),
+            ),
+          );
+        },
       ),
 
-      // Auth / Welcome
       GoRoute(
         path: AppRoutes.welcome,
-        builder: (context, state) => const WelcomeScreen(),
+        builder: (context, state) {
+          return const WelcomeScreen();
+        },
       ),
+
       GoRoute(
         path: AppRoutes.login,
-        builder: (context, state) => const AuthEntryScreen(),
+        builder: (context, state) {
+          return const AuthEntryScreen();
+        },
       ),
 
-      // Onboarding flow
       GoRoute(
         path: AppRoutes.onboardingActivity,
-        builder: (context, state) => const ActivityPickerScreen(),
+        builder: (context, state) {
+          return const ActivityPickerScreen();
+        },
       ),
+
       GoRoute(
         path: AppRoutes.onboardingIdentity,
-        builder: (context, state) => const IdentityScreen(),
+        builder: (context, state) {
+          return const IdentityScreen();
+        },
       ),
+
       GoRoute(
         path: AppRoutes.onboardingPhone,
-        builder: (context, state) => const PhoneScreen(),
+        builder: (context, state) {
+          return const PhoneScreen();
+        },
       ),
+
       GoRoute(
         path: AppRoutes.onboardingOtp,
-        builder: (context, state) => OtpScreen(
-          phone: state.extra as String?,
-        ),
+        builder: (context, state) {
+          final phone = state.extra as String?;
+
+          return OtpScreen(
+            phone: phone,
+          );
+        },
       ),
 
-      // Operator home
       GoRoute(
         path: AppRoutes.operatorHome,
-        builder: (context, state) => const OperatorHomeScreen(),
+        builder: (context, state) {
+          return const OperatorHomeScreen();
+        },
       ),
 
-      // Client shell with bottom nav
-      ShellRoute(
-        builder: (context, state, child) => ClientShell(
-          navigationShell: child as StatefulNavigationShell,
-        ),
-        routes: [
-          GoRoute(
-            path: AppRoutes.clientHome,
-            builder: (context, state) => const ClientHomeScreen(),
+      StatefulShellRoute.indexedStack(
+        builder: (
+          context,
+          state,
+          navigationShell,
+        ) {
+          return ClientShell(
+            navigationShell: navigationShell,
+          );
+        },
+        branches: [
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: AppRoutes.clientHome,
+                builder: (context, state) {
+                  return const ClientHomeScreen();
+                },
+              ),
+            ],
+          ),
+
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/trips',
+                builder: (context, state) {
+                  return const TripsScreen();
+                },
+              ),
+            ],
+          ),
+
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/inbox',
+                builder: (context, state) {
+                  return const InboxScreen();
+                },
+              ),
+            ],
+          ),
+
+          StatefulShellBranch(
+            routes: [
+              GoRoute(
+                path: '/home',
+                builder: (context, state) {
+                  return const HomeScreen();
+                },
+              ),
+            ],
           ),
         ],
       ),
     ],
   );
+
+  ref.onDispose(router.dispose);
+
+  return router;
 });
+
+String _authenticatedDestination({
+  required Ref ref,
+  required AsyncValue<dynamic> onboardingState,
+}) {
+  final onboardingStatus = onboardingState.value;
+
+  /*
+   * Adapt this section to the actual value returned by
+   * onboardingStatusProvider.
+   */
+
+  if (onboardingStatus == false) {
+    return AppRoutes.onboardingActivity;
+  }
+
+  final role = _readUserRole(ref);
+
+  if (role == 'operator') {
+    return AppRoutes.operatorHome;
+  }
+
+  return AppRoutes.clientHome;
+}
+
+String? _readUserRole(Ref ref) {
+  /*
+   * Replace this with your actual role provider, for example:
+
+   final roleState = ref.read(roleNotifierProvider);
+   return roleState.value;
+
+   This temporary implementation defaults to client.
+   */
+  return null;
+}
