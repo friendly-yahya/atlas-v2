@@ -90,7 +90,7 @@ class _OtpScreenState extends ConsumerState<OtpScreen> {
         await ref.read(supabaseClientProvider)
             .from('operator_profile')
             .update({'phone_verified': true})
-            .eq('id', user.id);
+            .eq('user_id', user.id);
       }
 
       if (mounted) context.go(AppRoutes.operatorHome);

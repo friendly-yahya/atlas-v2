@@ -52,7 +52,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
       if (user == null) throw Exception('Not authenticated');
 
       await ref.read(supabaseClientProvider).from('operator_profile').upsert({
-        'id': user.id,
+        'user_id': user.id,
         'first_name': _firstName.text.trim(),
         'last_name': _lastName.text.trim(),
         'date_of_birth': _dob!.toIso8601String().split('T')[0],
@@ -60,7 +60,7 @@ class _IdentityScreenState extends ConsumerState<IdentityScreen> {
         'city': _city.text.trim(),
         'region': _region.text.trim(),
         'postal_code': _postal.text.trim(),
-      });
+      }, onConflict: 'user_id');
 
       if (mounted) context.go(AppRoutes.onboardingPhone);
     } catch (e) {

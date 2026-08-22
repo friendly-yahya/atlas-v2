@@ -44,7 +44,7 @@ class OnboardingStatusNotifier extends AsyncNotifier<OnboardingStatus> {
     final profile = await supabase
         .from('operator_profile')
         .select('first_name, phone_verified')
-        .eq('id', authUser.id)
+        .eq('user_id', authUser.id)
         .maybeSingle();
 
     final activities = await supabase
